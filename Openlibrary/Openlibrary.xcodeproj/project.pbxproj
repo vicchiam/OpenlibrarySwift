@@ -286,6 +286,7 @@
 				1DFF84631C20AE05000B6A6F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
