@@ -29,7 +29,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
         let bloque = {
             (datos: NSData?, resp: NSURLResponse?, error: NSError?) -> Void in
                 if(error != nil){
-                    print(error!)
+                    dispatch_async(dispatch_get_main_queue(),{
+                        let alert=UIAlertController(title: "Error", message: "No se puede realizar la conexión", preferredStyle: .Alert)
+                        let okAction=UIAlertAction(title: "OK", style: .Default){ (action) in }
+                        alert.addAction(okAction)
+                        self.presentViewController(alert, animated: true, completion: nil)
+                    })
                 }
                 else{
                     let texto = NSString(data: datos!, encoding: NSUTF8StringEncoding)
