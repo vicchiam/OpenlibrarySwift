@@ -12,13 +12,21 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var campoTexto: UITextField!
     
-    @IBOutlet weak var respuesta: UITextView!
+    @IBOutlet weak var labelTitulo: UILabel!    
+    
+    @IBOutlet weak var labelAutores: UILabel!
+  
+    @IBOutlet weak var labelPortada: UILabel!    
+    
+    @IBOutlet weak var imagePortada: UIImageView!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         campoTexto.delegate=self
+        //campoTexto.text="9788426721679"
         
     }
 
@@ -37,16 +45,78 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     })
                 }
                 else{
-                    let texto = NSString(data: datos!, encoding: NSUTF8StringEncoding)
-            
                     dispatch_async(dispatch_get_main_queue(),{
-                        self.respuesta.text="\(texto!)"
+                        self.rellenarCampos(datos!)
                     })
                 }
         }
         
         let dt = sesion.dataTaskWithURL(url!, completionHandler: bloque)
         dt.resume()        
+    }
+    
+    func rellenarCampos(datos: NSData){
+        do{
+            let json = try NSJSONSerialization.JSONObjectWithData(datos, options: NSJSONReadingOptions.MutableLeaves)
+            let dicc1 = json as! NSDictionary
+            let first = dicc1.allValues[0]
+            let dicc2 = first as! NSDictionary
+            
+            var titulo="Sin titulo"
+            let title=dicc2["title"]
+            if(title != nil){
+                titulo=title as! String
+            }
+            
+            labelTitulo.text="Titulo: \(titulo)"
+            
+            var autores=""
+            let authors=dicc2["authors"]
+            if(authors != nil){
+                let authors_array=authors as! NSArray
+                if(authors_array.count>0){
+                    for autor in authors_array {
+                        let aux = autor as! NSDictionary
+                        let nombre = aux["name"]!
+                        autores+="\(nombre) \n"
+                    }
+                }
+            }
+            else{
+                autores="Sin autor/es"
+            }
+            
+            labelAutores.text = "Autor/es: \(autores)"
+            
+            var portada=""
+            let cover = dicc2["cover"]
+            if cover != nil {
+                let aux=cover as! NSDictionary
+                let medium = aux["medium"]
+                if(medium != nil){
+                    portada=medium as! String
+                }
+            }
+            
+            if(portada==""){
+                labelPortada.text="Sin portada"
+            }
+            else{
+                labelPortada.text = "Portada: "
+                ponerImagen(portada)
+            }
+            
+        }
+        catch _ {
+            print("Error")
+        }
+        
+    }
+    
+    func ponerImagen(url : String){
+        let data = NSData(contentsOfURL: NSURL(string: url)!)
+        let image=UIImage(data: data!)
+        imagePortada.image=image
     }
    
     //////////////////// Gestion del teclado /////////////////////////////
@@ -64,6 +134,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     {
         textField.resignFirstResponder()
         print(textField.text!)
+        
+        labelTitulo.text="Titulo:"
+        labelAutores.text="Autores"
+        labelPortada.text="Portada"
+        imagePortada.image=nil
+        
         asincrono(textField.text!)
         return true
     }
@@ -72,8 +148,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func limpiar(sender: UIButton) {
         campoTexto.text=""
-        respuesta.text=""
+        labelTitulo.text="Titulo:"
+        labelAutores.text="Autores"
+        labelPortada.text="Portada"
+        imagePortada.image=nil
     }
+    
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
