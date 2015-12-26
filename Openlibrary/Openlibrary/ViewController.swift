@@ -20,6 +20,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var imagePortada: UIImageView!
     
+    @IBOutlet weak var loading: UIActivityIndicatorView!
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,10 +30,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         campoTexto.delegate=self
         //campoTexto.text="9788426721679"
+        loading.hidden=true
         
     }
 
     func asincrono(isbn: String ){
+        self.loading.hidden=false
+        self.loading.startAnimating()
+        
         let urls = "https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:\(isbn)"
         let url = NSURL(string: urls)
         let sesion = NSURLSession.sharedSession()
@@ -38,6 +45,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
             (datos: NSData?, resp: NSURLResponse?, error: NSError?) -> Void in
                 if(error != nil){
                     dispatch_async(dispatch_get_main_queue(),{
+                        self.loading.stopAnimating()
+                        self.loading.hidden=true
+                        
                         let alert=UIAlertController(title: "Error", message: "No se puede realizar la conexión", preferredStyle: .Alert)
                         let okAction=UIAlertAction(title: "OK", style: .Default){ (action) in }
                         alert.addAction(okAction)
@@ -110,6 +120,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         catch _ {
             print("Error")
         }
+        self.loading.stopAnimating()
+        self.loading.hidden=true
         
     }
     
